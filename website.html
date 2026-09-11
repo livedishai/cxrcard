@@ -3,21 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>JEWELS-AI | Live Drive AR</title>
+  <title>JEWELS-AI | Collection Showcase</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-
   <style>
     :root {
       --deep: #130821;
       --deep-2: #1f0d33;
-      --brand-purple: #5E0F8B;
-      --brand-purple-dark: #2c0a49;
       --gold: #D4AF37;
       --gold-soft: #F0D687;
       --cream: #F5EFE6;
@@ -26,273 +21,20 @@
       --glass-border: rgba(212, 175, 55, 0.35);
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      margin: 0;
       background: var(--deep);
       overflow: hidden;
       font-family: 'Manrope', sans-serif;
       color: var(--cream);
       -webkit-tap-highlight-color: transparent;
       height: 100%;
-    }
-
-    body.catalog-open {
-      overflow: hidden;
-    }
-
-    /* Dim & soften the live camera feed behind open catalog */
-    body.catalog-open a-scene,
-    body.catalog-open #rawCameraFeed {
-      filter: brightness(0.25) saturate(0.7) blur(10px);
-      transition: filter 0.6s ease;
-      pointer-events: none;
-    }
-    a-scene { transition: filter 0.4s ease; }
-
-    #rawCameraFeed {
-      position: fixed;
-      inset: 0;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 0;
-      background: #000;
-      transition: filter 0.4s ease;
-    }
-
-    #blackCurtain {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 50% 40%, var(--deep-2) 0%, var(--deep) 70%);
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 22px;
-      transition: opacity 0.6s ease;
-      pointer-events: none;
-    }
-
-    .gem-loader {
-      width: 56px;
-      height: 56px;
-      animation: gemSpin 2.6s ease-in-out infinite;
-    }
-
-    .gem-loader path {
-      fill: none;
-      stroke: var(--gold);
-      stroke-width: 1.4;
-      stroke-linejoin: round;
-      filter: drop-shadow(0 0 6px rgba(212,175,55,0.55));
-    }
-
-    @keyframes gemSpin {
-      0%   { transform: rotate(0deg) scale(1); }
-      50%  { transform: rotate(180deg) scale(1.08); }
-      100% { transform: rotate(360deg) scale(1); }
-    }
-
-    #loader {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 500;
-      font-style: italic;
-      font-size: 19px;
-      letter-spacing: 2px;
-      color: var(--cream);
-      text-align: center;
-      animation: pulse 1.8s ease-in-out infinite;
-    }
-
-    #loader span {
-      display: block;
-      font-family: 'Manrope', sans-serif;
-      font-style: normal;
-      font-size: 10px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--gold-soft);
-      margin-top: 6px;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.55; }
-      50% { opacity: 1; }
-    }
-
-    #brandMark {
-      position: fixed;
-      top: max(18px, env(safe-area-inset-top));
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 600;
-      font-size: 15px;
-      letter-spacing: 3px;
-      color: var(--gold-soft);
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-
-    #brandMark::before {
-      content: "";
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 8px var(--gold);
-    }
-
-    #scanHint {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 400;
-      width: min(64vw, 260px);
-      aspect-ratio: 1;
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      pointer-events: none;
-    }
-
-    #scanHint .corner {
-      position: absolute;
-      width: 30px;
-      height: 30px;
-      border: 2px solid var(--gold);
-      opacity: 0.85;
-    }
-    #scanHint .tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
-    #scanHint .tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
-    #scanHint .bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
-    #scanHint .br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
-
-    #scanHint .scanline {
-      position: absolute;
-      left: 4px;
-      right: 4px;
-      height: 1.5px;
-      background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      box-shadow: 0 0 8px var(--gold);
-      animation: scanMove 2.2s ease-in-out infinite;
-    }
-
-    @keyframes scanMove {
-      0%   { top: 6%; opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: 1; }
-      100% { top: 92%; opacity: 0; }
-    }
-
-    #scanHint p {
-      position: absolute;
-      bottom: -34px;
-      width: 100%;
-      text-align: center;
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--cream-dim);
-    }
-
-    body.found #scanHint,
-    body.found #brandMark {
-      opacity: 0;
-    }
-
-    /* ---------- UI Buttons Styling ---------- */
-    .plan-button {
-      position: relative;
-      overflow: hidden;
-      padding: 13px 24px;
-      font-family: 'Manrope', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--brand-purple) 0%, var(--brand-purple-dark) 100%);
-      color: var(--cream);
-      cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      transition: transform 0.15s ease, opacity 0.4s ease;
-      white-space: nowrap;
-    }
-
-    .plan-button:active {
-      transform: scale(0.96);
-    }
-
-    /* Fixed Permanent Bottom-Left Catalog Button */
-    #openCatalogBtn {
-      position: fixed;
-      bottom: max(25px, env(safe-area-inset-bottom));
-      left: 20px;
-      z-index: 1000;
-      background: rgba(19, 8, 33, 0.85);
-      border: 1px solid var(--gold);
-      color: var(--gold-soft);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    body.catalog-open #openCatalogBtn {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* Centered Target Video Button Panel */
-    .video-panel {
-      position: fixed;
-      bottom: max(28px, env(safe-area-inset-bottom));
-      left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      display: flex;
-      opacity: 0;
-      z-index: 100;
-      transition: opacity 0.45s ease, transform 0.45s ease;
-      pointer-events: none;
-    }
-
-    body.found .video-panel {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-      pointer-events: auto;
-    }
-
-    body.catalog-open .video-panel {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* ================= Full-Page 3D Catalog ================= */
-    #catalogStage {
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
-      perspective: 2200px;
-      pointer-events: none;
     }
 
     #catalogSheet {
-      position: absolute;
+      position: fixed;
       inset: 0;
       height: 100dvh;
       width: 100vw;
@@ -304,17 +46,7 @@
       flex-direction: column;
       overflow: hidden;
       transform-style: preserve-3d;
-      transform-origin: 50% 100%;
-      transform: rotateX(-100deg) translateY(30px) scale(0.94);
-      opacity: 0;
-      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
-      pointer-events: none;
-    }
-
-    #catalogSheet.open {
-      transform: rotateX(0deg) translateY(0) scale(1);
-      opacity: 1;
-      pointer-events: auto;
+      perspective: 2200px;
     }
 
     #catalogSheet::before {
@@ -392,9 +124,6 @@
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-
-    #catalogSheet.open .sheet-title {
       animation: titleShine 2.2s ease-out 0.35s 1;
     }
 
@@ -472,10 +201,6 @@
       animation: cardRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    .catalog-card:active {
-      transition: transform 0.05s ease;
-    }
-
     @keyframes cardRise {
       from { opacity: 0; transform: translateY(26px) rotateX(18deg) scale(0.92); }
       to   { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
@@ -537,115 +262,34 @@
       font-size: 17px;
       font-style: italic;
     }
-
-    /* Force-hide MindAR UI elements */
-    [class^="mindar-ui"],
-    [id^="mindar-ui"],
-    .mindar-ui-overlay,
-    .a-enter-vr, 
-    .a-enter-ar, 
-    .a-orientation-modal {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      #catalogSheet, .catalog-card, .sheet-title, .sparkle {
-        animation: none !important;
-        transition: opacity 0.3s ease !important;
-      }
-      #catalogSheet { transform: none !important; }
-    }
   </style>
 </head>
-
 <body>
 
-  <video id="rawCameraFeed" autoplay playsinline muted></video>
+  <div id="catalogSheet">
+    <div class="sparkle-field" id="sparkleField"></div>
 
-  <div id="blackCurtain">
-    <svg class="gem-loader" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-      <path d="M28 4 L48 20 L28 52 L8 20 Z M8 20 L48 20 M18 20 L28 4 L38 20 M18 20 L28 52 M38 20 L28 52" />
-    </svg>
-    <div id="loader">Initializing<span>Camera &amp; AR</span></div>
-  </div>
-
-  <div id="brandMark">JEWELS·AI</div>
-
-  <div id="scanHint">
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-    <div class="scanline"></div>
-    <p>Align with drive card</p>
-  </div>
-
-  <!-- Permanent Bottom-Left Catalog Button -->
-  <button class="plan-button" id="openCatalogBtn">📖 Catalog</button>
-
-  <!-- Centered Video Controls (appears only on target detected) -->
-  <div class="video-panel" id="videoControls">
-    <button class="plan-button" id="toggleButton">▶ Play Video</button>
-  </div>
-
-  <!-- Full-Page 3D Catalog -->
-  <div id="catalogStage">
-    <div id="catalogSheet">
-      <div class="sparkle-field" id="sparkleField"></div>
-
-      <div class="sheet-header">
-        <button class="back-btn" id="closeCatalogBtn" aria-label="Close catalog">←</button>
-        <div class="sheet-header-text">
-          <div class="sheet-title">Collection Showcase</div>
-          <div class="sheet-subtitle">Tap a piece to catch the light</div>
-        </div>
+    <div class="sheet-header">
+      <button class="back-btn" id="closeCatalogBtn" onclick="window.history.back()">←</button>
+      <div class="sheet-header-text">
+        <div class="sheet-title">Collection Showcase</div>
+        <div class="sheet-subtitle">Tap a piece to catch the light</div>
       </div>
-
-      <div class="category-scroll" id="categoryTabs">
-        <button class="category-chip active" data-cat="all">All</button>
-        <button class="category-chip" data-cat="bridal">Bridal</button>
-        <button class="category-chip" data-cat="necklaces">Necklaces</button>
-        <button class="category-chip" data-cat="bangles">Bangles</button>
-        <button class="category-chip" data-cat="rings">Rings</button>
-      </div>
-
-      <div class="catalog-grid" id="catalogList"></div>
     </div>
+
+    <div class="category-scroll" id="categoryTabs">
+      <button class="category-chip active" data-cat="all">All</button>
+      <button class="category-chip" data-cat="bridal">Bridal</button>
+      <button class="category-chip" data-cat="necklaces">Necklaces</button>
+      <button class="category-chip" data-cat="bangles">Bangles</button>
+      <button class="category-chip" data-cat="rings">Rings</button>
+    </div>
+
+    <div class="catalog-grid" id="catalogList"></div>
   </div>
-
-  <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind; uiLoading: no; uiError: no; filterMinCF:0.0001; filterBeta: 0.001;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    renderer="antialias: true; alpha: true">
-
-    <a-assets>
-      <video id="driveVideo" playsinline webkit-playsinline preload="auto" loop crossorigin="anonymous"></video>
-    </a-assets>
-
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-    <!-- Target entity initialized hidden to prevent (0,0,0) world-origin display artifacts -->
-    <a-entity id="target1" mindar-image-target="targetIndex: 0" visible="false">
-      <!-- Standard A-Frame material rendering the video as-is without chroma keying -->
-      <a-plane 
-        id="videoPlane" 
-        width="1" 
-        height="1" 
-        visible="false" 
-        material="src: #driveVideo; side: double; transparent: false">
-      </a-plane>
-    </a-entity>
-  </a-scene>
 
   <script>
-    /* ======================================================
-       CONFIGURATION
-    ====================================================== */
     const API_KEY = "AIzaSyA_mBu6emRKASkqHpLtwkdBiCQKYO3rvcw"; 
-    const FOLDER_ID = "1jRyVReP4cq7yk1VqwdFCMt0w4on4S77Q";
 
     const CATALOG_FOLDERS = {
       bangles: "1loeb_40A3eOjzB2PnY24MXsxKFsE06L-",
@@ -656,53 +300,8 @@
 
     let CATALOG_ITEMS = [];
 
-    /* ======================================================
-       LIVE DRIVE VIDEO SYNC
-    ====================================================== */
-    async function getLatestVideoId() {
-      try {
-        const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'video/'&orderBy=modifiedTime desc&pageSize=1&fields=files(id)&key=${API_KEY}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        return (data.files && data.files.length > 0) ? data.files[0].id : null;
-      } catch (error) {
-        console.error("Drive Fetch Error:", error);
-        return null;
-      }
-    }
-
-    /* ======================================================
-       CATALOG IMAGES SYNC
-    ====================================================== */
-    async function fetchDriveCatalog() {
-      const items = [];
-      const fetchPromises = Object.entries(CATALOG_FOLDERS).map(async ([catName, folderId]) => {
-        try {
-          const query = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed=false`);
-          const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)&pageSize=30&key=${API_KEY}`;
-          const res = await fetch(url);
-          const data = await res.json();
-
-          if (data.files && data.files.length > 0) {
-            data.files.forEach(file => {
-              const cleanTitle = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-              items.push({
-                id: file.id,
-                name: cleanTitle,
-                category: catName,
-                img: `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`
-              });
-            });
-          }
-        } catch (err) {
-          console.error(`Error loading category: ${catName}`, err);
-        }
-      });
-
-      await Promise.all(fetchPromises);
-      CATALOG_ITEMS = items;
-      return items;
-    }
+    const catalogList = document.querySelector("#catalogList");
+    const categoryTabs = document.querySelectorAll(".category-chip");
 
     function buildSparkleField() {
       const field = document.querySelector("#sparkleField");
@@ -743,107 +342,63 @@
       card.addEventListener("pointerup", () => setTimeout(resetTilt, 120));
     }
 
-    async function startRawCameraFeed() {
-      const rawFeed = document.querySelector("#rawCameraFeed");
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.warn("getUserMedia not supported in this browser.");
-        return;
-      }
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false
-        });
-        rawFeed.srcObject = stream;
-        await rawFeed.play();
-      } catch (envErr) {
-        console.warn("Rear camera unavailable, falling back to default camera:", envErr);
+    async function fetchDriveCatalog() {
+      const items = [];
+      const fetchPromises = Object.entries(CATALOG_FOLDERS).map(async ([catName, folderId]) => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          rawFeed.srcObject = stream;
-          await rawFeed.play();
-        } catch (anyErr) {
-          console.error("Camera access failed entirely:", anyErr);
-        }
-      }
-    }
+          const query = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed=false`);
+          const url = `https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)&pageSize=30&key=${API_KEY}`;
+          const res = await fetch(url);
+          const data = await res.json();
 
-    /* ======================================================
-       APP LIFECYCLE & AR LOGIC
-    ====================================================== */
-    window.addEventListener("load", async () => {
-      const videoEl = document.querySelector("#driveVideo");
-      const videoPlane = document.querySelector("#videoPlane");
-      const target = document.querySelector("#target1");
-      const toggleButton = document.querySelector("#toggleButton");
-      const curtain = document.querySelector("#blackCurtain");
-      const sceneEl = document.querySelector('a-scene');
-
-      const openCatalogBtn = document.querySelector("#openCatalogBtn");
-      const closeCatalogBtn = document.querySelector("#closeCatalogBtn");
-      const catalogSheet = document.querySelector("#catalogSheet");
-      const catalogList = document.querySelector("#catalogList");
-      const categoryTabs = document.querySelectorAll(".category-chip");
-
-      let isPlaying = false;
-      let catalogTransitioning = false;
-      let currentLoadedFileId = null;
-
-      // Clean up stray MindAR UI elements
-      const uiKiller = setInterval(() => {
-        const uiElements = document.querySelectorAll('[class^="mindar-ui"], [id^="mindar-ui"]');
-        uiElements.forEach(el => el.remove());
-      }, 100);
-
-      buildSparkleField();
-      startRawCameraFeed();
-
-      // AUTO-CROP LOGIC (16:9 / 9:16 to fit cleanly in plane)
-      videoEl.addEventListener('loadedmetadata', () => {
-        if (!videoPlane) return;
-        const videoWidth = videoEl.videoWidth;
-        const videoHeight = videoEl.videoHeight;
-        if (videoWidth === 0 || videoHeight === 0) return;
-
-        const aspectRatio = videoWidth / videoHeight;
-        if (aspectRatio > 1) { 
-          // Horizontal Video: crop left & right
-          const repeatX = 1 / aspectRatio; 
-          const offsetX = (1 - repeatX) / 2;
-          videoPlane.setAttribute('material', `repeat: ${repeatX} 1; offset: ${offsetX} 0`);
-        } else {
-          // Vertical Video: crop top & bottom
-          const repeatY = aspectRatio; 
-          const offsetY = (1 - repeatY) / 2;
-          videoPlane.setAttribute('material', `repeat: 1 ${repeatY}; offset: 0 ${offsetY}`);
+          if (data.files && data.files.length > 0) {
+            data.files.forEach(file => {
+              const cleanTitle = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+              items.push({
+                id: file.id,
+                name: cleanTitle,
+                category: catName,
+                img: `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`
+              });
+            });
+          }
+        } catch (err) {
+          console.error(`Error loading category: ${catName}`, err);
         }
       });
 
-      function renderCatalog(filter = "all") {
-        catalogList.innerHTML = "";
-        const filtered = filter === "all" ? CATALOG_ITEMS : CATALOG_ITEMS.filter(i => i.category === filter);
+      await Promise.all(fetchPromises);
+      CATALOG_ITEMS = items;
+      return items;
+    }
 
-        if (filtered.length === 0) {
-          catalogList.innerHTML = `<div class="catalog-empty">No items found in this collection.</div>`;
-          return;
-        }
+    function renderCatalog(filter = "all") {
+      catalogList.innerHTML = "";
+      const filtered = filter === "all" ? CATALOG_ITEMS : CATALOG_ITEMS.filter(i => i.category === filter);
 
-        filtered.forEach((item, i) => {
-          const card = document.createElement("div");
-          card.className = "catalog-card";
-          card.style.animationDelay = Math.min(i * 55, 500) + "ms";
-          card.innerHTML = `
-            <div class="thumb-wrap">
-              <img src="${item.img}" alt="${item.name}" loading="lazy" />
-            </div>
-            <div class="tag">${item.category}</div>
-            <div class="name">${item.name}</div>
-          `;
-          catalogList.appendChild(card);
-          attachTilt(card);
-        });
+      if (filtered.length === 0) {
+        catalogList.innerHTML = `<div class="catalog-empty">No items found in this collection.</div>`;
+        return;
       }
 
+      filtered.forEach((item, i) => {
+        const card = document.createElement("div");
+        card.className = "catalog-card";
+        card.style.animationDelay = Math.min(i * 55, 500) + "ms";
+        card.innerHTML = `
+          <div class="thumb-wrap">
+            <img src="${item.img}" alt="${item.name}" loading="lazy" />
+          </div>
+          <div class="tag">${item.category}</div>
+          <div class="name">${item.name}</div>
+        `;
+        catalogList.appendChild(card);
+        attachTilt(card);
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      buildSparkleField();
       catalogList.innerHTML = `<div class="catalog-empty">Loading Collections…</div>`;
       await fetchDriveCatalog();
       renderCatalog("all");
@@ -854,161 +409,6 @@
           chip.classList.add("active");
           renderCatalog(chip.dataset.cat);
         });
-      });
-
-      function pauseCamera() {
-        try {
-          const arSystem = sceneEl.systems && sceneEl.systems["mindar-image-system"];
-          if (arSystem && typeof arSystem.pause === "function") {
-            arSystem.pause(false);
-          }
-        } catch (err) {
-          console.warn("Could not pause AR camera:", err);
-        }
-      }
-
-      function resumeCamera() {
-        try {
-          const arSystem = sceneEl.systems && sceneEl.systems["mindar-image-system"];
-          if (arSystem && typeof arSystem.unpause === "function") {
-            arSystem.unpause();
-          }
-        } catch (err) {
-          console.warn("Could not resume AR camera:", err);
-        }
-      }
-
-      function openCatalog() {
-        if (catalogTransitioning) return;
-        catalogTransitioning = true;
-
-        if (videoEl && !videoEl.paused) {
-          videoEl.pause();
-        }
-        isPlaying = false;
-        toggleButton.textContent = "▶ Play Video";
-
-        document.body.classList.add("catalog-open");
-        catalogSheet.classList.add("open");
-        pauseCamera();
-        setTimeout(() => { catalogTransitioning = false; }, 300);
-      }
-
-      function closeCatalog() {
-        if (catalogTransitioning) return;
-        catalogTransitioning = true;
-        catalogSheet.classList.remove("open");
-        document.body.classList.remove("catalog-open");
-        resumeCamera();
-        setTimeout(() => { catalogTransitioning = false; }, 300);
-      }
-
-      openCatalogBtn.addEventListener("click", openCatalog);
-      closeCatalogBtn.addEventListener("click", closeCatalog);
-
-      function dismissCurtain() {
-        if (curtain) {
-          curtain.style.opacity = "0";
-          setTimeout(() => { 
-            curtain.style.display = "none"; 
-            clearInterval(uiKiller);
-          }, 600);
-        }
-      }
-
-      let curtainDismissed = false;
-      function dismissCurtainOnce(reason) {
-        if (curtainDismissed) return;
-        curtainDismissed = true;
-        dismissCurtain();
-      }
-
-      sceneEl.addEventListener("arReady", () => dismissCurtainOnce("arReady event"));
-      sceneEl.addEventListener("arError", (err) => {
-        console.error("MindAR failed to start:", err);
-        dismissCurtainOnce("arError event");
-      });
-
-      const curtainWatcher = setInterval(() => {
-        const camFeed = document.querySelector('video.mindar-camera, video[autoplay]');
-        if (camFeed && camFeed.readyState >= 2 && !camFeed.paused) {
-          dismissCurtainOnce("camera video element playing");
-          clearInterval(curtainWatcher);
-        }
-      }, 300);
-
-      setTimeout(() => {
-        clearInterval(curtainWatcher);
-        dismissCurtainOnce("6s timeout fallback");
-      }, 6000);
-
-      // TARGET FOUND
-      target.addEventListener("targetFound", async () => {
-        document.body.classList.add("found");
-
-        if (!currentLoadedFileId) {
-          const fileId = await getLatestVideoId();
-          if (fileId) {
-            currentLoadedFileId = fileId;
-            videoEl.src = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-            videoEl.load();
-          }
-        }
-
-        isPlaying = false;
-        toggleButton.textContent = "▶ Play Video";
-
-        target.object3D.visible = true;
-        target.setAttribute("visible", "true");
-        if (videoPlane) {
-          videoPlane.object3D.visible = true;
-          videoPlane.setAttribute("visible", "true");
-        }
-      });
-
-      // TARGET LOST
-      target.addEventListener("targetLost", () => {
-        document.body.classList.remove("found");
-        closeCatalog();
-
-        if (!videoEl.paused) {
-          videoEl.pause();
-        }
-
-        target.object3D.visible = false;
-        target.setAttribute("visible", "false");
-
-        if (videoPlane) {
-          videoPlane.object3D.visible = false;
-          videoPlane.setAttribute("visible", "false");
-        }
-
-        isPlaying = false;
-        toggleButton.textContent = "▶ Play Video";
-      });
-
-      // PLAY/PAUSE CONTROLS
-      toggleButton.addEventListener("click", async () => {
-        try {
-          if (!isPlaying) {
-            videoEl.muted = false;
-            await videoEl.play();
-            toggleButton.textContent = "⏸ Pause Video";
-            isPlaying = true;
-            target.object3D.visible = true;
-            target.setAttribute("visible", "true");
-            if (videoPlane) {
-              videoPlane.object3D.visible = true;
-              videoPlane.setAttribute("visible", "true");
-            }
-          } else {
-            videoEl.pause();
-            toggleButton.textContent = "▶ Play Video";
-            isPlaying = false;
-          }
-        } catch (err) {
-          console.error("Playback error:", err);
-        }
       });
     });
 
